@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a097584dc2ea570419426e33b41808b5, type: 3}
+  m_Name: Mop
+  m_EditorClassIdentifier: Assembly-CSharp::Item
+  itemName: Mop
+  itemIcon: {fileID: -863073041, guid: 593e3e21d28ea1c42a017f3a62fedfd2, type: 3}
+  itemPrefab: {fileID: 2783179935683708076, guid: 81b38ba63d8522d4aba1c4826ba29053, type: 3}
+  twoHanded: 1
+  isMoppable: 1
+  dropHeightOffset: 0.1

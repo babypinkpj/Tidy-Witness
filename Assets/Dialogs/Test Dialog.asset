@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 981794d220a5a2d4bb6b3fffd7261d52, type: 3}
+  m_Name: Test Dialog
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueData
+  lines:
+  - speakerName: 1
+    text: Fish
+    portrait: {fileID: 1128576260, guid: 3ece3876a725ac54382acad17b3205c9, type: 3}
+  - speakerName: 2
+    text: Buny
+    portrait: {fileID: -913087334, guid: 53472ca4e3f12ec449f2aff735f3c9b0, type: 3}
+  - speakerName: 1
+    text: Loaf
+    portrait: {fileID: 1128576260, guid: 3ece3876a725ac54382acad17b3205c9, type: 3}
+  - speakerName: 2
+    text: Teto
+    portrait: {fileID: -913087334, guid: 53472ca4e3f12ec449f2aff735f3c9b0, type: 3}
+  - speakerName: 1
+    text: Miku
+    portrait: {fileID: 1128576260, guid: 3ece3876a725ac54382acad17b3205c9, type: 3}
+  loop: 0
