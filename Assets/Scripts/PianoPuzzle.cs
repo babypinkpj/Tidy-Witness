@@ -25,6 +25,14 @@ public class PianoPuzzle : MonoBehaviour
     [Header("Audio")]
     [Range(0.2f, 2f)] public float noteDuration = 0.7f;
     [Range(0f,  1f)]  public float noteVolume   = 0.8f;
+    [Tooltip("Assign 8 custom notes. If empty, uses procedural sine waves.")]
+    public AudioClip[] customNotes = new AudioClip[8];
+    [Tooltip("Distorted sound for failure.")]
+    public AudioClip distortedFailSound;
+    [Tooltip("Sound for puzzle solved.")]
+    public AudioClip solveSound;
+    
+    private AudioSource _sfxSource;
 
     [Header("Events")]
     public UnityEvent OnSolved;
@@ -34,6 +42,8 @@ public class PianoPuzzle : MonoBehaviour
     [Header("References")]
     [Tooltip("Disable player movement while the puzzle is open.")]
     public PlayerController playerController;
+    [Tooltip("Assign scripts here to disable during the puzzle (like your Camera Look script or PlayerInput).")]
+    public Behaviour[] componentsToDisable;
     [Tooltip("Assign a PianoUI component to show the on-screen overlay.")]
     public PianoUI ui;
 
@@ -61,9 +71,15 @@ public class PianoPuzzle : MonoBehaviour
 
     void Awake()
     {
+        _sfxSource = gameObject.AddComponent<AudioSource>();
+        _sfxSource.playOnAwake = false;
+        _sfxSource.spatialBlend = 0f;
+
         for (int i = 0; i < 8; i++)
         {
-            var clip = BakeClip(Frequencies[i], noteDuration);
+            AudioClip clip = (customNotes != null && i < customNotes.Length && customNotes[i] != null) 
+                                ? customNotes[i] 
+                                : BakeClip(Frequencies[i], noteDuration);
             var go   = new GameObject("PianoNote_" + NoteLabels[i]);
             go.transform.SetParent(transform);
             var src          = go.AddComponent<AudioSource>();
@@ -100,6 +116,12 @@ public class PianoPuzzle : MonoBehaviour
         GenerateSequence();
 
         if (playerController) playerController.enabled = false;
+        if (componentsToDisable != null)
+        {
+            foreach (var comp in componentsToDisable)
+                if (comp) comp.enabled = false;
+        }
+
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible   = true;
 
@@ -112,6 +134,12 @@ public class PianoPuzzle : MonoBehaviour
         StopAllCoroutines();
 
         if (playerController) playerController.enabled = true;
+        if (componentsToDisable != null)
+        {
+            foreach (var comp in componentsToDisable)
+                if (comp) comp.enabled = true;
+        }
+
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible   = false;
 
@@ -164,20 +192,28 @@ public class PianoPuzzle : MonoBehaviour
 
         yield return new WaitForSeconds(0.2f);
 
-        // Sweep through all 8 notes quickly
-        for (int i = 0; i < 8; i++)
+        if (distortedFailSound != null)
         {
-            PlayNote(i, 1f, noteVolume * 0.5f);
-            yield return new WaitForSeconds(0.05f);
+            _sfxSource.PlayOneShot(distortedFailSound, noteVolume);
+            yield return new WaitForSeconds(distortedFailSound.length + 0.1f);
         }
+        else
+        {
+            // Sweep through all 8 notes quickly
+            for (int i = 0; i < 8; i++)
+            {
+                PlayNote(i, 1f, noteVolume * 0.5f);
+                yield return new WaitForSeconds(0.05f);
+            }
 
-        yield return new WaitForSeconds(0.08f);
+            yield return new WaitForSeconds(0.08f);
 
-        // Distorted chaos: all 8 at random pitches simultaneously
-        for (int i = 0; i < 8; i++)
-            PlayNote(i, Random.Range(0.30f, 2.00f), noteVolume);
+            // Distorted chaos: all 8 at random pitches simultaneously
+            for (int i = 0; i < 8; i++)
+                PlayNote(i, Random.Range(0.30f, 2.00f), noteVolume);
 
-        yield return new WaitForSeconds(noteDuration + 0.4f);
+            yield return new WaitForSeconds(noteDuration + 0.4f);
+        }
 
         GenerateSequence();
         IsEvaluating = false;
@@ -191,18 +227,27 @@ public class PianoPuzzle : MonoBehaviour
 
         yield return new WaitForSeconds(0.3f);
 
-        // Ascending arpeggio to celebrate
-        for (int i = 0; i < 8; i++)
+        if (solveSound != null)
         {
-            PlayNote(i, 1f, noteVolume);
-            yield return new WaitForSeconds(0.08f);
+            _sfxSource.PlayOneShot(solveSound, noteVolume);
+            yield return new WaitForSeconds(solveSound.length + 0.1f);
         }
+        else
+        {
+            // Ascending arpeggio to celebrate
+            for (int i = 0; i < 8; i++)
+            {
+                PlayNote(i, 1f, noteVolume);
+                yield return new WaitForSeconds(0.08f);
+            }
 
-        yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.5f);
+        }
 
         OnSolved?.Invoke();
         Debug.Log("[PianoPuzzle] Puzzle Solved!");
         IsEvaluating = false;
+        Deactivate();
     }
 
     // ── Audio ─────────────────────────────────────────────────────────────────
@@ -266,19 +311,8 @@ public class PianoPuzzle : MonoBehaviour
     bool AnyActionKeyDown()
     {
         var kb = UnityEngine.InputSystem.Keyboard.current;
-        if (kb == null || !kb.anyKey.wasPressedThisFrame) return false;
+        if (kb == null) return false;
 
-        // Direction and system keys must NOT count as the "play" button
-        if (kb.wKey.wasPressedThisFrame) return false;
-        if (kb.aKey.wasPressedThisFrame) return false;
-        if (kb.sKey.wasPressedThisFrame) return false;
-        if (kb.dKey.wasPressedThisFrame) return false;
-        if (kb.upArrowKey.wasPressedThisFrame) return false;
-        if (kb.downArrowKey.wasPressedThisFrame) return false;
-        if (kb.leftArrowKey.wasPressedThisFrame) return false;
-        if (kb.rightArrowKey.wasPressedThisFrame) return false;
-        if (kb.escapeKey.wasPressedThisFrame) return false;
-
-        return true;
+        return kb.zKey.wasPressedThisFrame;
     }
 }

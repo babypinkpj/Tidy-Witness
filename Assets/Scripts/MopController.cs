@@ -24,8 +24,9 @@ public class MopController : MonoBehaviour
     [Tooltip("Particle system played while mopping (e.g. a water-splash effect).")]
     public ParticleSystem mopParticles;
 
-    [Tooltip("AudioSource used for mopping sounds.")]
-    public AudioSource mopAudio;
+    [Tooltip("Audio clip played while mopping.")]
+    public AudioClip mopSound;
+    private AudioSource mopAudio;
 
     // ── Private state ─────────────────────────────────────────────────────────
 
@@ -40,6 +41,14 @@ public class MopController : MonoBehaviour
     void Awake()
     {
         _playerController = GetComponent<PlayerController>();
+        if (mopSound != null)
+        {
+            mopAudio = gameObject.AddComponent<AudioSource>();
+            mopAudio.clip = mopSound;
+            mopAudio.loop = true;
+            mopAudio.playOnAwake = false;
+            mopAudio.spatialBlend = 0f;
+        }
     }
 
     void Update()
